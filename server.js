@@ -9,15 +9,28 @@ app.use(express.json());
 let tasks = [];
 let nextId = 1;
 
-app.get('/tasks', (req, res) => {
-  res.json(tasks);
+// GET /tasks/:id
+app.get('/tasks/:id', (req, res) => {
+  // Convertir l'ID reçu en nombre entier
+  const id = parseInt(req.params.id, 10);
+
+  // Rechercher la tâche dans le tableau
+  const task = tasks.find(t => t.id === id);
+
+  // Si non trouvée -> Erreur 404
+  if (!task) {
+    return res.status(404).json({ error: "Tâche non trouvée" });
+  }
+
+  // Si trouvée -> Renvoi de la tâche
+  return res.json(task);
 });
 
 app.post('/tasks', (req, res) => {
-  const { title } = req.body;
-  
+  const { title } = req.body || {};
+
   if (!title) {
-    return res.status(400).json({ error: 'Le titre est obligatoire.' });
+    return res.status(400).json({ error: "Le titre est obligatoire." });
   }
 
   const newTask = {
@@ -27,7 +40,7 @@ app.post('/tasks', (req, res) => {
   };
 
   tasks.push(newTask);
-  res.status(201).json(newTask);
+  return res.status(201).json(newTask);
 });
 
 app.put('/tasks/:id', (req, res) => {
