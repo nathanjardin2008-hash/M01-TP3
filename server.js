@@ -26,8 +26,28 @@ app.get('/tasks/:id', (req, res) => {
   return res.json(task);
 });
 
+// GET: filter the tasks based on the status (completed or not)
+app.get('/tasks', (req, res) => {
+  let filteredTasks = tasks;
+
+  if (req.query.completed) {
+
+    if (req.query === 'completed') {
+      const {completed} = req.query;
+      filteredTasks = tasks.filter(task => task.completed === completed);
+    }
+    else if (req.query !== 'completed') {
+      const completed = req.query === 'false';
+      filteredTasks = tasks.filter(task => task.completed === completed);
+    }
+  } else {
+    return res.json(filteredTasks);
+  }
+
+});
+
 app.post('/tasks', (req, res) => {
-  const { title } = req.body || {};
+  const { title, completed } = req.body || {};
 
   if (!title) {
     return res.status(400).json({ error: "Le titre est obligatoire." });
@@ -35,8 +55,8 @@ app.post('/tasks', (req, res) => {
 
   const newTask = {
     id: nextId++,
-    title: title,
-    completed: false
+    title,
+    completed: completed === true || completed === 'true'
   };
 
   tasks.push(newTask);
@@ -54,7 +74,9 @@ app.put('/tasks/:id', (req, res) => {
   }
 
   if (title !== undefined) task.title = title;
-  if (completed !== undefined) task.completed = completed;
+  if (completed !== undefined) {
+    task.completed = completed === true || completed === 'true';
+  }
 
   res.json(task);
 });
